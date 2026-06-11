@@ -1,1 +1,422 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<title>Sorteios Online</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Inter',sans-serif;
+}
+
+body{
+background:#050816;
+color:white;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+/* Fundo */
+
+.bg{
+position:fixed;
+inset:0;
+z-index:-2;
+overflow:hidden;
+}
+
+.blur{
+position:absolute;
+width:500px;
+height:500px;
+border-radius:50%;
+filter:blur(150px);
+opacity:.6;
+animation:float 10s infinite ease-in-out;
+}
+
+.blur:nth-child(1){
+background:#00ffd5;
+top:-150px;
+left:-150px;
+}
+
+.blur:nth-child(2){
+background:#7c3aed;
+right:-150px;
+top:20%;
+animation-delay:2s;
+}
+
+.blur:nth-child(3){
+background:#0099ff;
+bottom:-150px;
+left:30%;
+animation-delay:4s;
+}
+
+@keyframes float{
+0%,100%{
+transform:translate(0,0);
+}
+50%{
+transform:translate(60px,-40px);
+}
+}
+
+.container{
+max-width:1100px;
+margin:auto;
+padding:30px;
+}
+
+.hero{
+text-align:center;
+margin-bottom:40px;
+}
+
+.hero h1{
+font-size:3rem;
+background:linear-gradient(90deg,#00ffd5,#7c3aed);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+}
+
+.hero p{
+color:#cbd5e1;
+margin-top:10px;
+}
+
+.glass{
+background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);
+backdrop-filter:blur(20px);
+border-radius:20px;
+}
+
+.admin{
+padding:25px;
+margin-bottom:30px;
+}
+
+.admin h2{
+margin-bottom:20px;
+}
+
+.form{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+input,select{
+padding:12px;
+border:none;
+border-radius:12px;
+background:rgba(255,255,255,.08);
+color:white;
+}
+
+option{
+background:#111827;
+}
+
+button{
+padding:12px 18px;
+border:none;
+border-radius:12px;
+cursor:pointer;
+font-weight:600;
+}
+
+.btn-add{
+background:linear-gradient(90deg,#00ffd5,#7c3aed);
+color:white;
+}
+
+.lista{
+display:grid;
+gap:15px;
+}
+
+.card{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px;
+}
+
+.info{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.status{
+width:14px;
+height:14px;
+border-radius:50%;
+}
+
+.active{
+background:#22c55e;
+box-shadow:0 0 15px #22c55e;
+}
+
+.finished{
+background:#ef4444;
+box-shadow:0 0 15px #ef4444;
+}
+
+.badge{
+padding:8px 12px;
+border-radius:999px;
+font-size:.85rem;
+font-weight:600;
+}
+
+.badge-active{
+background:rgba(34,197,94,.15);
+color:#22c55e;
+}
+
+.badge-finished{
+background:rgba(239,68,68,.15);
+color:#ef4444;
+}
+
+.actions{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.delete-btn{
+background:#ef4444;
+color:white;
+}
+
+footer{
+text-align:center;
+margin-top:40px;
+color:#94a3b8;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:2rem;
+}
+
+.card{
+flex-direction:column;
+align-items:flex-start;
+gap:15px;
+}
+
+.actions{
+width:100%;
+justify-content:space-between;
+}
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg">
+<div class="blur"></div>
+<div class="blur"></div>
+<div class="blur"></div>
+</div>
+
+<div class="container">
+
+<div class="hero">
+<h1>🎁 Sorteios Online</h1>
+<p>Gerencie e acompanhe seus sorteios.</p>
+</div>
+
+<div class="admin glass">
+
+<h2>Painel Administrativo</h2>
+
+<div class="form">
+
+<input
+type="text"
+id="titulo"
+placeholder="Nome do sorteio">
+
+<select id="status">
+<option value="ativo">Ativo</option>
+<option value="encerrado">Encerrado</option>
+</select>
+
+<button
+class="btn-add"
+onclick="adicionarSorteio()">
+Adicionar Sorteio
+</button>
+
+</div>
+
+</div>
+
+<h2 style="margin-bottom:20px;">
+Sorteios
+</h2>
+
+<div id="lista" class="lista"></div>
+
+<footer>
+© 2026 - Plataforma de Sorteios
+</footer>
+
+</div>
+
+<script>
+
+let sorteios =
+JSON.parse(
+localStorage.getItem("sorteios")
+) || [
+
+{
+titulo:"Pix de R$100",
+status:"ativo"
+},
+
+{
+titulo:"Headset Gamer",
+status:"encerrado"
+}
+
+];
+
+function salvar(){
+
+localStorage.setItem(
+"sorteios",
+JSON.stringify(sorteios)
+);
+
+}
+
+function renderizar(){
+
+const lista =
+document.getElementById("lista");
+
+lista.innerHTML = "";
+
+sorteios.forEach((sorteio,index)=>{
+
+const ativo =
+sorteio.status === "ativo";
+
+lista.innerHTML += `
+
+<div class="card glass">
+
+<div class="info">
+
+<div class="status ${
+ativo ? "active" : "finished"
+}"></div>
+
+<h3>${sorteio.titulo}</h3>
+
+</div>
+
+<div class="actions">
+
+<div class="badge ${
+ativo
+? "badge-active"
+: "badge-finished"
+}">
+
+${
+ativo
+? "Ativo"
+: "Encerrado"
+}
+
+</div>
+
+<button
+class="delete-btn"
+onclick="remover(${index})">
+
+Excluir
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+function adicionarSorteio(){
+
+const titulo =
+document.getElementById("titulo");
+
+const status =
+document.getElementById("status");
+
+if(!titulo.value.trim()){
+
+alert("Digite o nome do sorteio.");
+return;
+
+}
+
+sorteios.push({
+
+titulo:titulo.value,
+status:status.value
+
+});
+
+salvar();
+renderizar();
+
+titulo.value = "";
+
+}
+
+function remover(index){
+
+if(confirm("Excluir sorteio?")){
+
+sorteios.splice(index,1);
+
+salvar();
+renderizar();
+
+}
+
+}
+
+renderizar();
+
+</script>
+
+</body>
+</html>
